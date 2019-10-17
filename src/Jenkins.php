@@ -446,6 +446,26 @@ class Jenkins
     return new Jenkins\Build($infos, $this);
   }
 
+  public function getWorkspaceFile($job, $filename) {
+    $url  = sprintf('%s/job/%s/ws/%s', $this->baseUrl, $job, $filename);
+    $curl = curl_init($url);
+    curl_setopt($curl, \CURLOPT_RETURNTRANSFER, 1);
+    $ret = curl_exec($curl);
+    $info = curl_getinfo($curl);
+    if ($info['http_code'] !== 200) {
+      return false;
+    }
+    if (!is_dir('/vagrant/vagrant/downloads')) {
+      mkdir('/vagrant/vagrant/downloads');
+    }
+    if (pathinfo($filename, PATHINFO_EXTENSION) === 'gz') {
+      $filename = substr($filename, 0, -3);
+      $ret = gzdecode($ret);
+    }
+    file_put_contents('/vagrant/vagrant/downloads/' . $filename, $ret);
+    return true;
+  }
+
   /**
    * @param string $job
    * @param int    $buildId
