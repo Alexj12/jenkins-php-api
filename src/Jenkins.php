@@ -355,6 +355,28 @@ class Jenkins
   }
 
   /**
+   * @return Jenkins\Queue
+   * @throws \RuntimeException
+   */
+  public function getQueueItem($id)
+  {
+    $url  = sprintf('%s/queue/item/%s/api/json', $this->baseUrl, $id);
+    $curl = curl_init($url);
+
+    curl_setopt($curl, \CURLOPT_RETURNTRANSFER, 1);
+    $ret = curl_exec($curl);
+
+    $this->validateCurl($curl, sprintf('Error during getting information for queue on %s, queue item: %s', $this->baseUrl, $id));
+
+    $infos = json_decode($ret);
+    if (!$infos instanceof \stdClass) {
+      throw new \RuntimeException('Error during json_decode');
+    }
+
+    return $infos;
+  }
+
+  /**
    * @return Jenkins\View[]
    */
   public function getViews()
